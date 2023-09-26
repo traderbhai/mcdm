@@ -1,7 +1,17 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 st.title("Multi-Criteria Decision Making with TOPSIS")
+
+st.markdown(
+    "**TOPSIS**, or the Technique for Order of Preference by Similarity to Ideal Solution, is a multi-criteria decision analysis method. This method is used to determine the best solution from a set of alternatives, based on multiple criteria or attributes. The basic idea behind TOPSIS is to identify solutions that are closest to the ideal solution and furthest from the anti-ideal or negative-ideal solution."
+)
+
+st.write("For more information see:")
+
+st.markdown(
+    'Hwang, C.L.; Lai, Y.J.; Liu, T.Y. (1993). "A new approach for multiple objective decision making". _Computers and Operational Research_. **20** (8): 889-899. [doi](https://en.wikipedia.org/wiki/Doi_(identifier) "Doi (identifier)"):[10.1016/0305-0548(93)90109-v](https://doi.org/10.1016%2F0305-0548%2893%2990109-v).'
+)
 
 st.header("Options")
 
@@ -22,86 +32,119 @@ criteria_scores["Criterion"] = criteria_scores["Criterion"].astype(str)
 criteria_scores["Weight"] = criteria_scores["Weight"].astype(float)
 criteria_scores["Is Negative"] = criteria_scores["Is Negative"].astype(bool)
 
-st.write("2. Add criteria, weights, specify if negative, and scores for each option.")
+st.write(
+    "2. Add criteria, weights, and specify if the criterion is negative. Provide scores for each option."
+)
 
 edited_criteria_scores = st.data_editor(criteria_scores, num_rows="dynamic")
 
 st.header("Options preference")
 
 if not edited_criteria_scores.empty:
-    melted = edited_criteria_scores.melt(
+    melted_df = edited_criteria_scores.melt(
         id_vars=["Criterion", "Weight", "Is Negative"],
         var_name="Option",
+        value_name="Score",
     )
-    melted["value"] = melted["value"].astype(float)
+    melted_df["Score"] = melted_df["Score"].astype(float)
 
-    normalization = melted
-    normalization["Squered"] = normalization["value"] ** 2
-    normalization = (
-        normalization.groupby("Criterion")["Squered"]
+    normalization_factor = melted_df
+    normalization_factor["SqueredScore"] = normalization_factor["Score"] ** 2
+    normalization_factor = (
+        normalization_factor.groupby("Criterion")["SqueredScore"]
         .sum()
         .reset_index()
-        .rename(columns={"Squered": "Normalization"})
+        .rename(columns={"SqueredScore": "NormalizedScore"})
     )
-    normalization["Normalization"] = normalization["Normalization"] ** 0.5
-
-    full_matrix = melted.merge(normalization, on="Criterion", how="left")
-    full_matrix["NormalizedScore"] = full_matrix["value"] / full_matrix["Normalization"]
-    full_matrix["NormalizedWeightedScore"] = (
-        full_matrix["NormalizedScore"] * full_matrix["Weight"]
+    normalization_factor["NormalizedScore"] = (
+        normalization_factor["NormalizedScore"] ** 0.5
     )
 
-    full_matrix["Is Negative"] = full_matrix["Is Negative"].fillna(False)
-    positive = full_matrix[full_matrix["Is Negative"] == False]
-    max_positive = (
-        positive.groupby("Criterion")["NormalizedWeightedScore"]
+    normalized_weighted = melted_df.merge(
+        normalization_factor, on="Criterion", how="left"
+    )
+    normalized_weighted["NormalizedScore"] = (
+        normalized_weighted["Score"] / normalized_weighted["NormalizedScore"]
+    )
+    normalized_weighted["NormalizedWeightedScore"] = (
+        normalized_weighted["NormalizedScore"] * normalized_weighted["Weight"]
+    )
+    normalized_weighted["Is Negative"] = normalized_weighted["Is Negative"].fillna(
+        False
+    )
+
+    positive_criteria = normalized_weighted[normalized_weighted["Is Negative"] == False]
+    best_positive = (
+        positive_criteria.groupby("Criterion")["NormalizedWeightedScore"]
         .max()
         .reset_index()
-        .rename(columns={"NormalizedWeightedScore": "Max"})
+        .rename(columns={"NormalizedWeightedScore": "IdealBest"})
     )
-    min_positive = (
-        positive.groupby("Criterion")["NormalizedWeightedScore"]
+    worst_positive = (
+        positive_criteria.groupby("Criterion")["NormalizedWeightedScore"]
         .min()
         .reset_index()
-        .rename(columns={"NormalizedWeightedScore": "Min"})
+        .rename(columns={"NormalizedWeightedScore": "IdealWorst"})
     )
 
-    negative = full_matrix[full_matrix["Is Negative"] == True]
-    max_negative = (
-        negative.groupby("Criterion")["NormalizedWeightedScore"]
+    negative_criteria = normalized_weighted[normalized_weighted["Is Negative"] == True]
+    best_negative = (
+        negative_criteria.groupby("Criterion")["NormalizedWeightedScore"]
         .min()
         .reset_index()
-        .rename(columns={"NormalizedWeightedScore": "Max"})
+        .rename(columns={"NormalizedWeightedScore": "IdealBest"})
     )
-    min_negative = (
-        negative.groupby("Criterion")["NormalizedWeightedScore"]
+    worst_negative = (
+        negative_criteria.groupby("Criterion")["NormalizedWeightedScore"]
         .max()
         .reset_index()
-        .rename(columns={"NormalizedWeightedScore": "Min"})
+        .rename(columns={"NormalizedWeightedScore": "IdealWorst"})
     )
 
-    max_min_positive = max_positive.merge(min_positive, on="Criterion", how="left")
-    max_min_negative = max_negative.merge(min_negative, on="Criterion", how="left")
-    max_min = pd.concat([max_min_positive, max_min_negative])
+    best_worst_positive = best_positive.merge(
+        worst_positive, on="Criterion", how="left"
+    )
+    best_worst_negative = best_negative.merge(
+        worst_negative, on="Criterion", how="left"
+    )
+    ideal_best_worst = pd.concat([best_worst_positive, best_worst_negative])
 
-    full_matrix = full_matrix.merge(
-        max_min[["Criterion", "Max", "Min"]], on="Criterion", how="left"
+    normalized_weighted = normalized_weighted.merge(
+        ideal_best_worst[["Criterion", "IdealBest", "IdealWorst"]],
+        on="Criterion",
+        how="left",
     )
 
-    full_matrix["plus"] = (
-        full_matrix["NormalizedWeightedScore"] - full_matrix["Max"]
+    normalized_weighted["EuclidianDistanceBestPartial"] = (
+        normalized_weighted["NormalizedWeightedScore"]
+        - normalized_weighted["IdealBest"]
     ) ** 2
-    full_matrix["minus"] = (
-        full_matrix["NormalizedWeightedScore"] - full_matrix["Min"]
+    normalized_weighted["EuclidianDistanceWorstPartial"] = (
+        normalized_weighted["NormalizedWeightedScore"]
+        - normalized_weighted["IdealWorst"]
     ) ** 2
 
-    euclidian = full_matrix.groupby("Option")[["plus", "minus"]].sum().reset_index()
-    euclidian["plus"] = euclidian["plus"] ** 0.5
-    euclidian["minus"] = euclidian["minus"] ** 0.5
-    euclidian["Performance Score"] = euclidian["minus"] / (
-        euclidian["plus"] + euclidian["minus"]
+    euclidian = (
+        normalized_weighted.groupby("Option")[
+            ["EuclidianDistanceBestPartial", "EuclidianDistanceWorstPartial"]
+        ]
+        .sum()
+        .reset_index()
+    )
+    euclidian["EuclidianDistanceBest"] = (
+        euclidian["EuclidianDistanceBestPartial"] ** 0.5
+    )
+    euclidian["EuclidianDistanceWorst"] = (
+        euclidian["EuclidianDistanceWorstPartial"] ** 0.5
+    )
+    euclidian["Performance Score"] = euclidian["EuclidianDistanceWorst"] / (
+        euclidian["EuclidianDistanceBest"] + euclidian["EuclidianDistanceWorst"]
     )
 
     euclidian["Rank"] = euclidian["Performance Score"].rank(ascending=False)
 
-    st.dataframe(euclidian[["Option", "Performance Score", "Rank"]])
+    st.dataframe(euclidian[["Option", "Performance Score", "Rank"]], hide_index=True)
+
+st.markdown(
+    "Made with ❤️ by Maurycy Blaszczak ([maurycyblaszczak.com](https://maurycyblaszczak.com/))"
+)
