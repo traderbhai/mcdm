@@ -14,6 +14,7 @@ pandas = "^2.1.3"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.6"
 pyright = "^1.1.338"
+pytest = "^7.4.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -79,7 +80,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["mcdm"]
+known-first-party = ["mcdm_app", "mcdm", "pages"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

@@ -1,5 +1,11 @@
 # Multi-Criteria Decision Making
 
+[![building - Poetry](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/python-poetry/website/main/static/badge/v0.json)](https://python-poetry.org/)
+[![linting - Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![code style - Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![imports - isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![types - pyright](https://img.shields.io/badge/types-pyright-blue.svg)](https://github.com/microsoft/pyright)
+
 ## Overview
 
 In today's complex world, inundated with countless choices, making informed decisions is more critical than ever. This project introduces a multi-criteria decision analysis tool powered by Python and Streamlit, harnessing the potential of the TOPSIS method.
@@ -8,7 +14,7 @@ In today's complex world, inundated with countless choices, making informed deci
 
 ## Features
 
-- [x] Built with **Python**.
+- [x] Built with **🐍Python**.
 - [x] Web interface powered by **Streamlit**.
 - [x] Implements the **TOPSIS** method for decision making.
 
@@ -25,26 +31,26 @@ git clone https://github.com/LuxF3rre/mcdm
 ### 2. Navigate to the Project Directory:
 Change your directory to the cloned repository:
 
-```bash
+```console
 cd mcdm
 ```
 
 ### 3. Install Dependencies:
 Install all necessary dependencies using the following command:
 
-```bash
+```console
 pip install -r requirements.txt
 ```
 
 ### 4. Run the App:
 Launch the Streamlit app using:
 
-```bash
-streamlit run TOPSIS.py
+```console
+streamlit run ./src/mcdm_app/Home.py
 ```
 
 ### 5. Access the Webapp:
-Upon successful execution, Streamlit will provide a local URL (usually http://localhost:8501/). Simply open this URL in your preferred browser and follow the on-screen instructions to use the app.
+Upon successful execution, Streamlit will provide a local URL (http://localhost:8501/). Simply open this URL in your preferred browser and follow the on-screen instructions to use the app.
 
 ## References
 
