@@ -1,19 +1,18 @@
 from decimal import Decimal
 
 import pandas as pd
-import streamlit as st
 
 
 def calculate_normalized_weighted_scores(scores: pd.DataFrame) -> pd.DataFrame:
     normalization_factor = scores
-    normalization_factor["SqueredScore"] = normalization_factor["Score"] ** 2
+    normalization_factor["SqueredScore"] = normalization_factor["Score"] ** Decimal("2")
     normalization_factor = (
         normalization_factor.groupby("Criterion")["SqueredScore"]
         .sum()
         .reset_index()
         .rename(columns={"SqueredScore": "SumOfSqueredScore"})
     )
-    normalization_factor["NormalizationFactor"] = normalization_factor["SumOfSqueredScore"] ** Decimal(str(0.5))
+    normalization_factor["NormalizationFactor"] = normalization_factor["SumOfSqueredScore"] ** Decimal("0.5")
 
     normalized_weighted = scores.merge(normalization_factor, on="Criterion", how="left")
     normalized_weighted["NormalizedScore"] = normalized_weighted["Score"] / normalized_weighted["NormalizationFactor"]
@@ -25,7 +24,7 @@ def calculate_normalized_weighted_scores(scores: pd.DataFrame) -> pd.DataFrame:
 
 
 def calculate_ideal_best_and_worst(normalized_weighted_scores: pd.DataFrame) -> pd.DataFrame:
-    positive_criteria = normalized_weighted_scores[normalized_weighted_scores["Is Negative"] == False]
+    positive_criteria = normalized_weighted_scores[~normalized_weighted_scores["Is Negative"]]
     best_positive = (
         positive_criteria.groupby("Criterion")["NormalizedWeightedScore"]
         .max()
@@ -39,7 +38,7 @@ def calculate_ideal_best_and_worst(normalized_weighted_scores: pd.DataFrame) -> 
         .rename(columns={"NormalizedWeightedScore": "IdealWorst"})
     )
 
-    negative_criteria = normalized_weighted_scores[normalized_weighted_scores["Is Negative"] == True]
+    negative_criteria = normalized_weighted_scores[normalized_weighted_scores["Is Negative"]]
     best_negative = (
         negative_criteria.groupby("Criterion")["NormalizedWeightedScore"]
         .min()
@@ -69,16 +68,16 @@ def calculate_ideal_best_and_worst(normalized_weighted_scores: pd.DataFrame) -> 
 def calculate_euclidian_distance(ideal_best_and_worst: pd.DataFrame) -> pd.DataFrame:
     ideal_best_and_worst["EuclidianDistanceBest"] = (
         ideal_best_and_worst["NormalizedWeightedScore"] - ideal_best_and_worst["IdealBest"]
-    ) ** 2
+    ) ** Decimal("2")
     ideal_best_and_worst["EuclidianDistanceWorst"] = (
         ideal_best_and_worst["NormalizedWeightedScore"] - ideal_best_and_worst["IdealWorst"]
-    ) ** 2
+    ) ** Decimal("2")
 
     euclidian_distance = (
         ideal_best_and_worst.groupby("Option")[["EuclidianDistanceBest", "EuclidianDistanceWorst"]].sum().reset_index()
     )
-    euclidian_distance["EuclidianDistanceBest"] = euclidian_distance["EuclidianDistanceBest"] ** Decimal(str(0.5))
-    euclidian_distance["EuclidianDistanceWorst"] = euclidian_distance["EuclidianDistanceWorst"] ** Decimal(str(0.5))
+    euclidian_distance["EuclidianDistanceBest"] = euclidian_distance["EuclidianDistanceBest"] ** Decimal("0.5")
+    euclidian_distance["EuclidianDistanceWorst"] = euclidian_distance["EuclidianDistanceWorst"] ** Decimal("0.5")
 
     return euclidian_distance
 
@@ -94,6 +93,6 @@ def calculate_performance_score(euclidian_distance: pd.DataFrame) -> pd.DataFram
 
 
 def calculate_topsis(scores: pd.DataFrame) -> pd.DataFrame:
-    return calculate_performance_score(
+    return calculate_performance_score(  # pyright: ignore
         calculate_euclidian_distance(calculate_ideal_best_and_worst(calculate_normalized_weighted_scores(scores)))
     )[["Option", "Performance Score", "Rank"]]
