@@ -70,15 +70,13 @@ weights["a"] = None
 weights["b"] = None
 weights["c"] = None
 
-for column in ["a", "b", "c"]:
-    weights[column] = weights[column].astype(float)
-
 scores = edited_options.merge(edited_criteria, how="cross").drop(columns="Is Negative")
 scores["a"] = None
 scores["b"] = None
 scores["c"] = None
 
 for column in ["a", "b", "c"]:
+    weights[column] = weights[column].astype(float)
     scores[column] = scores[column].astype(float)
 
 weights_dict = {}
