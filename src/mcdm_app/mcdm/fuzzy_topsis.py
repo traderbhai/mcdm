@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -69,7 +70,7 @@ class TriangularFuzzyNumber:
         return self.c > other.c or self == other
 
     @staticmethod
-    def combine(fuzzy_numbers: list["TriangularFuzzyNumber"], how: str | None = None) -> "TriangularFuzzyNumber":
+    def combine(fuzzy_numbers: list["TriangularFuzzyNumber"], how: Optional[str] = None) -> "TriangularFuzzyNumber":
         if how == "max":
             return TriangularFuzzyNumber(
                 max(number.a for number in fuzzy_numbers),
@@ -212,4 +213,6 @@ def calculate_fuzzy_topsis(decision_matrixes: pd.DataFrame) -> pd.DataFrame:
                 )
             )
         )
-    )[["Option", "ClosenessCoefficient", "Rank"]].rename(columns={"ClosenessCoefficient": "Performance Score"})  # pyright: ignore
+    )[["Option", "ClosenessCoefficient", "Rank"]].rename(
+        columns={"ClosenessCoefficient": "Performance Score"}
+    )  # pyright: ignore
