@@ -6,7 +6,7 @@
 [![code style - Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![imports - isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![types - pyright](https://img.shields.io/badge/types-pyright-blue.svg)](https://github.com/microsoft/pyright)
-![Status](https://github.com/LuxF3rre/mcdm/actions/workflows/python-app.yml/badge.svg)
+[![Build](https://github.com/LuxF3rre/mcdm/actions/workflows/python-app.yml/badge.svg)](https://github.com/LuxF3rre/mcdm/actions/workflows/python-app.yml)
 
 ## Overview
 
