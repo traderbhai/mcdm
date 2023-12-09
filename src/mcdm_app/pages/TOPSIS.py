@@ -21,14 +21,14 @@ st.write("For more information see:")
 
 st.markdown(
     'Hwang, C.L.; Lai, Y.J.; Liu, T.Y. (1993). "A new approach for multiple objective decision making". '
-    "_Computers and Operational Research_. **20** (8): 889-899. [doi](https://en.wikipedia.org/wiki/Doi_(identifier) "
-    '"Doi (identifier)"):[10.1016/0305-0548(93)90109-v](https://doi.org/10.1016%2F0305-0548%2893%2990109-v).'
+    "_Computers and Operational Research_. **20** (8): 889-899. [doi](https://en.wikipedia.org/wiki/Digital_object_identifier):"
+    "[10.1016/0305-0548(93)90109-v](https://doi.org/10.1016%2F0305-0548%2893%2990109-v)."
 )
 
 st.header("Options")
 options = pd.DataFrame(columns=["Option"])
 
-st.write("1. Add options in the table below.")
+st.write("Add options in the table below.")
 
 edited_options = st.data_editor(options, num_rows="dynamic")
 
@@ -41,7 +41,7 @@ criteria_scores["Criterion"] = criteria_scores["Criterion"].astype(str)
 criteria_scores["Weight"] = criteria_scores["Weight"].astype(float)
 criteria_scores["Is Negative"] = criteria_scores["Is Negative"].astype(bool)
 
-st.write("2. Add criteria, weights, and specify if the criterion is negative. Provide scores for each option.")
+st.write("Add criteria, weights, and specify if the criterion is negative. Provide scores for each option.")
 
 edited_criteria_scores = st.data_editor(criteria_scores, num_rows="dynamic")
 
@@ -53,14 +53,13 @@ if st.button("Calculate options preference"):
         var_name="Option",
         value_name="Score",
     )
-    if data_for_topsis["Weight"].isna().any() or data_for_topsis["Score"].isna().any():
+    if data_for_topsis["Weight"].isna().any() or data_for_topsis["Score"].isna().any():  # pyright: ignore
         st.error("Please, fill out all Weights and Scores.")
     else:
         data_for_topsis["Score"] = data_for_topsis["Score"].apply(lambda x: Decimal(str(x)))
         data_for_topsis["Weight"] = data_for_topsis["Weight"].apply(lambda x: Decimal(str(x)))
         data_for_topsis["Is Negative"] = data_for_topsis["Is Negative"].fillna(False)
 
-        print(data_for_topsis.to_json())
         topsis = calculate_topsis(data_for_topsis)
 
         st.dataframe(topsis, hide_index=True)
