@@ -70,10 +70,16 @@ weights["a"] = None
 weights["b"] = None
 weights["c"] = None
 
+for column in ["a", "b", "c"]:
+    weights[column] = weights[column].astype(float)
+
 scores = edited_options.merge(edited_criteria, how="cross").drop(columns="Is Negative")
 scores["a"] = None
 scores["b"] = None
 scores["c"] = None
+
+for column in ["a", "b", "c"]:
+    scores[column] = scores[column].astype(float)
 
 weights_dict = {}
 scores_dict = {}
@@ -81,11 +87,11 @@ for decision_maker_number in range(number_of_decision_makers):
     st.markdown(f"### Decision maker no. {decision_maker_number + 1}")
     st.markdown("#### Weights")
 
-    weights_dict[decision_maker_number] = st.data_editor(weights, key=f"Weight{decision_maker_number}")
+    weights_dict[decision_maker_number] = st.data_editor(weights, key=f"Weight{decision_maker_number}", hide_index=True)
 
     st.markdown("#### Scores")
 
-    scores_dict[decision_maker_number] = st.data_editor(scores, key=f"Score{decision_maker_number}")
+    scores_dict[decision_maker_number] = st.data_editor(scores, key=f"Score{decision_maker_number}", hide_index=True)
 
 st.header("Options Preference")
 
