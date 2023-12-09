@@ -75,6 +75,7 @@ ignore = [
     "D213",    # multi-line-summary-second-line`
     "ISC001",  # single-line-implicit-string-concatenation solved by formatter
     "N999",    # streamlit page titles
+    "UP007",   # issues with streamlit
 ]
 unfixable = [
     # Don't touch unused imports
