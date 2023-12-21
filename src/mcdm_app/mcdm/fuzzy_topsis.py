@@ -213,6 +213,4 @@ def calculate_fuzzy_topsis(decision_matrixes: pd.DataFrame) -> pd.DataFrame:
                 )
             )
         )
-    )[["Option", "ClosenessCoefficient", "Rank"]].rename(
-        columns={"ClosenessCoefficient": "Performance Score"}
-    )  # pyright: ignore
+    )[["Option", "ClosenessCoefficient", "Rank"]].rename(columns={"ClosenessCoefficient": "Performance Score"})  # pyright: ignore
