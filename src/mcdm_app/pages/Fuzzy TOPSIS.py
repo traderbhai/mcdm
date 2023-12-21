@@ -94,7 +94,7 @@ for decision_maker_number in range(number_of_decision_makers):
 st.header("Options Preference")
 
 if st.button("Calculate options preference"):
-    decision_matrix = pd.DataFrame(columns=["Option", "Criterion", "Is Negative", "Weight", "Score"])
+    decision_matrix = pd.DataFrame(columns=["Option", "Criterion", "Weight", "Score"])
     for decision_maker_number in range(number_of_decision_makers):
         scores_dict[decision_maker_number]["a"] = scores_dict[decision_maker_number]["a"].apply(
             lambda x: Decimal(str(x))
@@ -137,8 +137,10 @@ if st.button("Calculate options preference"):
 
         weights_dict[decision_maker_number] = weights_dict[decision_maker_number].drop(columns=["a", "b", "c"])
 
-        merged = scores_dict[decision_maker_number].merge(
-            weights_dict[decision_maker_number], on="Criterion", how="left"
+        merged = (
+            scores_dict[decision_maker_number]
+            .merge(weights_dict[decision_maker_number], on="Criterion", how="left")
+            .merge(edited_criteria, on="Criterion", how="left")
         )
 
         decision_matrix = pd.concat([decision_matrix, merged])
